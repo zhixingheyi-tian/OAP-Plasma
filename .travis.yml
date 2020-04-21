@@ -13,6 +13,18 @@ jobs:
       - sudo apt-get install cmake
       - #install numactl-devel
       - sudo apt-get install libnuma-dev
+      install:
+      - # Download spark 2.4.4
+      - "[ -f spark ] || mkdir spark && cd spark && wget http://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz && cd .."
+      - "tar -xf ./spark/spark-2.4.4-bin-hadoop2.7.tgz"
+      - "export SPARK_HOME=`pwd`/spark-2.4.4-bin-hadoop2.7"
+      before_script:
+      - cd /tmp
+      - git clone https://github.com/memkind/memkind.git
+      - cd memkind && ./build.sh
+      - make
+      - sudo make install
+      - cd ${TRAVIS_BUILD_DIR}
       - #install vemecache
       - git clone https://github.com/pmem/vmemcache.git
       - pushd vmemcache
@@ -37,18 +49,6 @@ jobs:
       - cd ../../java
       - mvn -q clean -Dcheckstyle.skip=true -Dmaven.test.skip=true install
       - echo $(ls -R ~/.m2/repository/org/apache/arrow/arrow-plasma)
-      install:
-      - # Download spark 2.4.4
-      - "[ -f spark ] || mkdir spark && cd spark && wget http://archive.apache.org/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz && cd .."
-      - "tar -xf ./spark/spark-2.4.4-bin-hadoop2.7.tgz"
-      - "export SPARK_HOME=`pwd`/spark-2.4.4-bin-hadoop2.7"
-      before_script:
-      - cd /tmp
-      - git clone https://github.com/memkind/memkind.git
-      - cd memkind && ./build.sh
-      - make
-      - sudo make install
-      - cd ${TRAVIS_BUILD_DIR}
       script:
       - cd ${TRAVIS_BUILD_DIR}
       - mvn clean -q -Ppersistent-memory test
